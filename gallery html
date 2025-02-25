@@ -14,7 +14,6 @@
             overflow: hidden;
             font-family: 'Arial', sans-serif;
         }
-
         .stars {
             position: fixed;
             top: 0;
@@ -23,19 +22,16 @@
             height: 100%;
             pointer-events: none;
         }
-
         .star {
             position: absolute;
             background: white;
             border-radius: 50%;
             animation: twinkle 1.5s infinite ease-in-out;
         }
-
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
         }
-
         .gallery-container {
             position: fixed;
             top: 50%;
@@ -48,7 +44,6 @@
             align-items: center;
             perspective: 1000px;
         }
-
         .gallery {
             position: relative;
             width: 300px;
@@ -56,7 +51,6 @@
             transform-style: preserve-3d;
             transition: transform 0.5s ease-out;
         }
-
         .card {
             position: absolute;
             width: 300px;
@@ -70,34 +64,29 @@
             overflow: hidden;
             transform-origin: center center;
         }
-
         @media (max-width: 768px) {
             .gallery, .card {
                 width: 240px;
                 height: 320px;
             }
         }
-
         @media (max-width: 480px) {
             .gallery, .card {
                 width: 200px;
                 height: 280px;
             }
         }
-
         .card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         .card.active {
             transform: scale(1.1) translateZ(100px);
             box-shadow: 0 0 30px rgba(255, 192, 203, 0.5);
             z-index: 10;
             border: 2px solid rgba(255, 192, 203, 0.8);
         }
-
         .number {
             position: absolute;
             bottom: 10px;
@@ -115,7 +104,6 @@
     <div class="gallery-container">
         <div class="gallery"></div>
     </div>
-
     <script>
         // Create stars
         function createStars() {
@@ -131,7 +119,6 @@
                 starsContainer.appendChild(star);
             }
         }
-
         // Create gallery
         function createGallery() {
             const gallery = document.querySelector('.gallery');
@@ -139,8 +126,106 @@
             const radius = window.innerWidth < 768 ? 400 : 600; // Reduced radius for better centering
             let currentAngle = 0;
             let isDragging = false;
-            let startX = 0;
-            let currentX = 0;
+            const angle = (currentAngle + extraRotation + (index * (360 / totalCards))) * (Math.PI / 180);
+                    const x = Math.sin(angle) * radius;
+                    const z = Math.cos(angle) * radius;
+                    const rotateY = angle * (180 / Math.PI);
+                    
+                    card.style.transform = translate3d(${x}px, 0, ${z}px) rotateY(${rotateY}deg);
+                    
+                    const normalizedAngle = ((currentAngle + extraRotation + (index * (360 / totalCards))) % 360 + 360) % 360;
+                    if (normalizedAngle > 350 || normalizedAngle < 10) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
 
-            // Create cards
-            for
+                    const opacity = Math.max(0.2, 1 - Math.abs(normalizedAngle - 180) / 180);
+                    card.style.opacity = opacity;
+                });
+            }
+
+            // Mouse and touch event handlers
+            gallery.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                currentX = currentAngle;
+                gallery.style.cursor = 'grabbing';
+                clearInterval(autoRotateInterval);
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const diff = (e.clientX - startX) * 0.5;
+                currentAngle = currentX + diff;
+                updateCards();
+
+                // Light up the appropriate button based on drag direction
+                const dragDirection = e.movementX;
+                prevButton.classList.toggle('active', dragDirection < 0);
+                nextButton.classList.toggle('active', dragDirection > 0);
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                gallery.style.cursor = 'grab';
+                prevButton.classList.remove('active');
+                nextButton.classList.remove('active');
+            });
+
+            // Touch events
+            gallery.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                currentX = currentAngle;
+                clearInterval(autoRotateInterval);
+                e.preventDefault();
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const diff = (e.touches[0].clientX - startX) * 0.5;
+                currentAngle = currentX + diff;
+                updateCards();
+                
+                // Light up the appropriate button based on touch direction
+                const touchDirection = e.touches[0].clientX - startX;
+                prevButton.classList.toggle('active', touchDirection < 0);
+                nextButton.classList.toggle('active', touchDirection > 0);
+                
+                e.preventDefault();
+            }, { passive: false });
+
+            window.addEventListener('touchend', () => {
+                isDragging = false;
+                prevButton.classList.remove('active');
+                nextButton.classList.remove('active');
+            });
+
+            // Mouse wheel handler
+            window.addEventListener('wheel', (e) => {
+                clearInterval(autoRotateInterval);
+                const delta = e.deltaX * 0.1 || e.deltaY * 0.1;
+                currentAngle += delta;
+                updateCards();
+                
+                // Light up the appropriate button based on wheel direction
+                prevButton.classList.toggle('active', delta > 0);
+                nextButton.classList.toggle('active', delta < 0);
+            });
+
+            // Initial update
+            updateCards();
+        }
+
+        // Initialize
+        createStars();
+        createGallery();
+    </script>
+</body>
+</html>
+        
+
+        
+     
+            
